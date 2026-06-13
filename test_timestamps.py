@@ -20,6 +20,15 @@ class ParseFCPTimeSecondsTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             timestamps.parse_fcp_time_seconds('bad-value')
 
+        with self.assertRaises(ValueError):
+            timestamps.parse_fcp_time_seconds(None)
+
+        with self.assertRaises(ValueError):
+            timestamps.parse_fcp_time_seconds(123)
+
+        with self.assertRaises(ValueError):
+            timestamps.parse_fcp_time_seconds('10/20/30s')
+
     def test_errors_on_zero_denominator(self):
         with self.assertRaises(ValueError):
             timestamps.parse_fcp_time_seconds('1/0s')
