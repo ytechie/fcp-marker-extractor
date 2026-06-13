@@ -10,10 +10,21 @@ MARKER_XPATH = './/marker'
 
 
 def parse_fcp_time_seconds(time_string):
+    if not isinstance(time_string, str) or not time_string:
+        raise ValueError("Invalid time format: expected non-empty string")
+
     normalized = time_string[:-1] if time_string.endswith('s') else time_string
-    values = [float(value) for value in normalized.split('/')]
+    try:
+        values = [float(value) for value in normalized.split('/')]
+    except ValueError as exc:
+        raise ValueError(f"Invalid time format: {time_string}") from exc
+
     if len(values) == 1:
         return values[0]
+    if len(values) != 2:
+        raise ValueError(f"Invalid time format: {time_string}")
+    if values[1] == 0:
+        raise ValueError(f"Invalid time format with zero denominator: {time_string}")
     return values[0] / values[1]
 
 

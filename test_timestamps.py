@@ -13,6 +13,17 @@ class ParseFCPTimeSecondsTests(unittest.TestCase):
     def test_parses_fractional_seconds(self):
         self.assertEqual(timestamps.parse_fcp_time_seconds('300/25s'), 12.0)
 
+    def test_errors_on_invalid_input(self):
+        with self.assertRaises(ValueError):
+            timestamps.parse_fcp_time_seconds('')
+
+        with self.assertRaises(ValueError):
+            timestamps.parse_fcp_time_seconds('bad-value')
+
+    def test_errors_on_zero_denominator(self):
+        with self.assertRaises(ValueError):
+            timestamps.parse_fcp_time_seconds('1/0s')
+
 
 class MarkerTimestampTests(unittest.TestCase):
     def test_calculate_marker_seconds_rounds_result(self):
