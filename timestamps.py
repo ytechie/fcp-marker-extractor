@@ -10,7 +10,8 @@ MARKER_XPATH = './/marker'
 
 
 def parse_fcp_time_seconds(time_string):
-    values = [float(value) for value in time_string.replace('s', '').split('/')]
+    normalized = time_string[:-1] if time_string.endswith('s') else time_string
+    values = [float(value) for value in normalized.split('/')]
     if len(values) == 1:
         return values[0]
     return values[0] / values[1]

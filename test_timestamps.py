@@ -61,14 +61,13 @@ class LoadXmlRootTests(unittest.TestCase):
             timestamps.load_xml_root(str(missing_path))
 
     def test_load_xml_root_errors_for_malformed_xml(self):
-        with tempfile.NamedTemporaryFile('w', suffix='.fcpxml', delete=False) as tmp:
-            tmp.write("<fcpxml><broken></fcpxml>")
-            malformed_path = tmp.name
-
-        self.addCleanup(lambda: Path(malformed_path).unlink(missing_ok=True))
+        tmp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp_dir.cleanup)
+        malformed_path = Path(tmp_dir.name) / "malformed.fcpxml"
+        malformed_path.write_text("<fcpxml><broken></fcpxml>", encoding="utf-8")
 
         with self.assertRaises(ValueError):
-            timestamps.load_xml_root(malformed_path)
+            timestamps.load_xml_root(str(malformed_path))
 
 
 if __name__ == '__main__':
