@@ -24,7 +24,7 @@ def format_marker_output(seconds, marker_value):
     return f"{datetime.timedelta(seconds=seconds)} {marker_value}"
 
 
-def _required_attribute(element, attribute_name, element_name):
+def get_required_attribute(element, attribute_name, element_name):
     value = element.get(attribute_name)
     if value is None:
         raise ValueError(f"Missing required '{attribute_name}' attribute on {element_name} element")
@@ -47,17 +47,17 @@ def extract_marker_lines(root):
 
     for parent in marker_parents:
         parent_offset = parse_fcp_time_seconds(
-            _required_attribute(parent, 'offset', 'parent')
+            get_required_attribute(parent, 'offset', 'parent')
         )
         parent_start = parse_fcp_time_seconds(
-            _required_attribute(parent, 'start', 'parent')
+            get_required_attribute(parent, 'start', 'parent')
         )
 
         for marker in parent.findall(MARKER_XPATH):
             marker_start = parse_fcp_time_seconds(
-                _required_attribute(marker, 'start', 'marker')
+                get_required_attribute(marker, 'start', 'marker')
             )
-            marker_value = _required_attribute(marker, 'value', 'marker')
+            marker_value = get_required_attribute(marker, 'value', 'marker')
             seconds = calculate_marker_seconds(parent_offset, parent_start, marker_start)
             lines.append(format_marker_output(seconds, marker_value))
 

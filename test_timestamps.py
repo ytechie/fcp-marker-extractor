@@ -1,5 +1,7 @@
 import unittest
 import xml.etree.ElementTree as ET
+from pathlib import Path
+import tempfile
 
 import timestamps
 
@@ -29,6 +31,44 @@ class MarkerTimestampTests(unittest.TestCase):
         lines = timestamps.extract_marker_lines(root)
 
         self.assertEqual(lines, ['0:00:14 A'])
+
+    def test_extract_marker_lines_errors_on_missing_parent_offset(self):
+        root = ET.fromstring(
+            '<fcpxml><sequence start="5s"><marker start="9s" value="A"/></sequence></fcpxml>'
+        )
+
+        with self.assertRaises(ValueError) as ctx:
+            timestamps.extract_marker_lines(root)
+
+        self.assertIn("offset", str(ctx.exception))
+
+    def test_extract_marker_lines_errors_on_missing_marker_value(self):
+        root = ET.fromstring(
+            '<fcpxml><sequence offset="10s" start="5s"><marker start="9s"/></sequence></fcpxml>'
+        )
+
+        with self.assertRaises(ValueError) as ctx:
+            timestamps.extract_marker_lines(root)
+
+        self.assertIn("value", str(ctx.exception))
+
+
+class LoadXmlRootTests(unittest.TestCase):
+    def test_load_xml_root_errors_for_missing_file(self):
+        missing_path = Path(tempfile.gettempdir()) / "definitely_missing.fcpxml"
+
+        with self.assertRaises(FileNotFoundError):
+            timestamps.load_xml_root(str(missing_path))
+
+    def test_load_xml_root_errors_for_malformed_xml(self):
+        with tempfile.NamedTemporaryFile('w', suffix='.fcpxml', delete=False) as tmp:
+            tmp.write("<fcpxml><broken></fcpxml>")
+            malformed_path = tmp.name
+
+        self.addCleanup(lambda: Path(malformed_path).unlink(missing_ok=True))
+
+        with self.assertRaises(ValueError):
+            timestamps.load_xml_root(malformed_path)
 
 
 if __name__ == '__main__':
